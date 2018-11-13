@@ -4,10 +4,10 @@ const debug = require('debug')('app');
 const morgan = require('morgan');
 const path = require('path');
 
+const booksRouter = require('./src/routes/booksRoutes');
 
 const app = express();
 
-const booksRouter = express.Router();
 
 app.use(morgan('tiny'));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -19,15 +19,6 @@ app.set('views', './src/views');
 //  app.set('view engine', 'pug');
 app.set('view engine', 'ejs');
 
-booksRouter.route('/')
-  .get((req, res) => {
-    res.send('hello books');
-  });
-
-booksRouter.route('/single')
-  .get((req, res) => {
-    res.send('hello single book');
-  });
 
 app.use('/books', booksRouter);
 
