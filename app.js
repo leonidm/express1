@@ -14,11 +14,15 @@ app.use('/js', express.static(path.join(__dirname, '/node_modules/bootstrap/dist
 app.use('/js', express.static(path.join(__dirname, '/node_modules/jquery/dist')));
 
 app.set('views', './src/views');
-app.set('view engine', 'pug');
+//  app.set('view engine', 'pug');
+app.set('view engine', 'ejs');
 
 app.get('/', (req, res) => {
   //  res.sendFile(path.join(__dirname, 'views', 'index.html'));
-  res.render('index', { list: ['a', 'b'] });
+  res.render('index', {
+    list: ['a', 'b', 'cc'],
+    title: 'Library',
+  });
 });
 
 const port = process.env.PORT || 3000;
