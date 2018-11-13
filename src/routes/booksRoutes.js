@@ -1,15 +1,17 @@
 const express = require('express');
+const debug = require('debug')('app');
 const books = require('./books');
 
 const booksRouter = express.Router();
+
+// eslint-disable-next-line no-var
+let nav = 1;
 
 booksRouter.route('/')
   .get((req, res) => {
     res.render('bookListView',
       {
-        nav: [
-          { link: '/books', title: 'Books' },
-          { link: '/authors', title: 'Authors' }],
+        nav,
         title: 'Library',
         books
       });
@@ -23,13 +25,14 @@ booksRouter.route('/:id')
     } else {
       res.render('bookView',
         {
-          nav: [
-            { link: '/books', title: 'Books' },
-            { link: '/authors', title: 'Authors' }],
+          nav,
           title: 'Library',
           book: books[id]
         });
     }
   });
 
-module.exports = booksRouter;
+module.exports = (n) => {
+  nav = n;
+  return booksRouter;
+};

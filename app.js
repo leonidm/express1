@@ -4,7 +4,6 @@ const debug = require('debug')('app');
 const morgan = require('morgan');
 const path = require('path');
 
-const booksRouter = require('./src/routes/booksRoutes');
 
 const app = express();
 
@@ -19,6 +18,12 @@ app.set('views', './src/views');
 //  app.set('view engine', 'pug');
 app.set('view engine', 'ejs');
 
+const nav = [
+  { link: '/books', title: 'Books' },
+  { link: '/authors', title: 'Authors' }
+];
+
+const booksRouter = require('./src/routes/booksRoutes')(nav);
 
 app.use('/books', booksRouter);
 
