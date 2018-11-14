@@ -1,6 +1,6 @@
 const express = require('express');
 const sql = require('mssql');
-const debug = require('debug')('app:bookRoutes');
+// const debug = require('debug')('app:bookRoutes');
 // const books = require('./books');
 
 module.exports = (nav) => {
@@ -12,6 +12,7 @@ module.exports = (nav) => {
       (async function query() {
         const request = new sql.Request();
         const { recordset } = await request.query('select * from books');
+        // debug(recordset);
         res.render('bookListView',
           {
             nav,
@@ -22,7 +23,8 @@ module.exports = (nav) => {
     });
 
   booksRouter.route('/:id')
-    .get((req, res) => {
+    // this is midleware - executed for every HTTP request for this route(get, post, put, etc...)
+    .all((req, res, next) => {
       (async function query() {
         const { id } = req.params;
         const request = new sql.Request();
@@ -30,14 +32,18 @@ module.exports = (nav) => {
         const { recordset } = await request
           .input('id', sql.Int, id)
           .query('select * from books where id = @id');
-
-        res.render('bookView',
-          {
-            nav,
-            title: 'Library',
-            book: recordset[0]
-          });
+        
+        [req.book] = recordset;
+        next();
       }());
+    })
+    .get((req, res) => {
+      res.render('bookView',
+        {
+          nav,
+          title: 'Library',
+          book: req.book
+        });
     });
 
   return booksRouter;
