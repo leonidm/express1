@@ -3,10 +3,25 @@ const chalk = require('chalk');
 const debug = require('debug')('app');
 const morgan = require('morgan');
 const path = require('path');
+const sql = require('mssql');
 
+
+debug(`Process id is ${chalk.yellow(process.pid)}`);
 
 const app = express();
 
+const config = {
+  user: 'leonid',
+  password: 'Kuku1111',
+  server: 'leo-server1.database.windows.net', // You can use 'localhost\\instance' to connect to named instance
+  database: 'PSLibrary',
+
+  options: {
+    encrypt: true // Use this if you're on Windows Azure
+  }
+};
+
+sql.connect(config).catch(err => debug(err));
 
 app.use(morgan('tiny'));
 app.use(express.static(path.join(__dirname, 'public')));

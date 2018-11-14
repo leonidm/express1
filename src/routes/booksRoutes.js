@@ -1,38 +1,45 @@
 const express = require('express');
-const debug = require('debug')('app');
-const books = require('./books');
+const sql = require('mssql');
+const debug = require('debug')('app:bookRoutes');
+// const books = require('./books');
 
-const booksRouter = express.Router();
+module.exports = (nav) => {
 
-// eslint-disable-next-line no-var
-let nav = 1;
+  const booksRouter = express.Router();
+  let books = [];
 
-booksRouter.route('/')
-  .get((req, res) => {
-    res.render('bookListView',
-      {
-        nav,
-        title: 'Library',
-        books
-      });
-  });
+  booksRouter.route('/')
+    .get((req, res) => {
 
-booksRouter.route('/:id')
-  .get((req, res) => {
-    const { id } = req.params;
-    if (id < 0 || id > books.length) {
-      res.send('No such a book');
-    } else {
-      res.render('bookView',
-        {
-          nav,
-          title: 'Library',
-          book: books[id]
+      const request = new sql.Request();
+      request.query('select * from books')
+        .then((result) => {
+          // debug(result);
+          books = result.recordset;
+          res.render('bookListView',
+            {
+              nav,
+              title: 'Library',
+              books
+            });
         });
-    }
-  });
+    });
 
-module.exports = (n) => {
-  nav = n;
+  booksRouter.route('/:id')
+    .get((req, res) => {
+      const { id } = req.params;
+      if (id < 0 || id > books.length) {
+        res.send('No such a book');
+      } else {
+        const book = books.find(b => b.id === +id);
+        res.render('bookView',
+          {
+            nav,
+            title: 'Library',
+            book
+          });
+      }
+    });
+
   return booksRouter;
 };
