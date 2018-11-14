@@ -6,39 +6,38 @@ const debug = require('debug')('app:bookRoutes');
 module.exports = (nav) => {
 
   const booksRouter = express.Router();
-  let books = [];
 
   booksRouter.route('/')
     .get((req, res) => {
-
-      const request = new sql.Request();
-      request.query('select * from books')
-        .then((result) => {
-          // debug(result);
-          books = result.recordset;
-          res.render('bookListView',
-            {
-              nav,
-              title: 'Library',
-              books
-            });
-        });
+      (async function query() {
+        const request = new sql.Request();
+        const { recordset } = await request.query('select * from books');
+        res.render('bookListView',
+          {
+            nav,
+            title: 'Library',
+            books: recordset
+          });
+      }());
     });
 
   booksRouter.route('/:id')
     .get((req, res) => {
-      const { id } = req.params;
-      if (id < 0 || id > books.length) {
-        res.send('No such a book');
-      } else {
-        const book = books.find(b => b.id === +id);
+      (async function query() {
+        const { id } = req.params;
+        const request = new sql.Request();
+
+        const { recordset } = await request
+          .input('id', sql.Int, id)
+          .query('select * from books where id = @id');
+
         res.render('bookView',
           {
             nav,
             title: 'Library',
-            book
+            book: recordset[0]
           });
-      }
+      }());
     });
 
   return booksRouter;
