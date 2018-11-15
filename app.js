@@ -44,8 +44,12 @@ const nav = [
 ];
 
 const booksRouter = require('./src/routes/booksRoutes')(nav);
+const booksRouterMongo = require('./src/routes/booksRoutesMongo')(nav);
+const adminRouter = require('./src/routes/adminRoutes')(nav);
 
 app.use('/books', booksRouter);
+app.use('/mongo/books', booksRouterMongo);
+app.use('/admin', adminRouter);
 
 app.get('/', (req, res) => {
   //  res.sendFile(path.join(__dirname, 'views', 'index.html'));
