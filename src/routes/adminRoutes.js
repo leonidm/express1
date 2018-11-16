@@ -3,7 +3,7 @@ const { MongoClient } = require('mongodb');
 const debug = require('debug')('app:adminRoutes');
 const books = require('./books');
 
-module.exports = (nav) => {
+module.exports = () => {
 
   const adminRouter = express.Router();
 
