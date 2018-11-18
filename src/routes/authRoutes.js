@@ -10,12 +10,37 @@ module.exports = () => {
   authRouter.route('/signUp')
     .post((req, res) => {
 
-      debug(req.body); // body is added to req object by body-parser package
+      const { username, password } = req.body;
+      const url = 'mongodb://localhost:27017';
+      const dbName = 'libraryApp';
 
-      // create user
-      req.login(req.body, () => { // login is added as we call app.use(passport.initialize()); login will use passport strategy
-        res.redirect('/auth/profile');
-      });
+      (async function query() {
+        let client;
+        try {
+          client = await MongoClient.connect(url);
+          debug('Connected to mongo server');
+          const db = client.db(dbName);
+          const col = await db.collection('users');
+          const user = { username, password };
+          const results = await col.insertOne(user);
+          // debug(results);
+
+          // create user
+          const createdUser = results.ops[0];
+          req.login(createdUser, () => { // login is added as we call app.use(passport.initialize());
+            res.redirect('/auth/profile');
+          });
+        } catch (err) {
+          debug(err.stack);
+          res.send('Server error');
+        }
+        if (client) {
+          client.close();
+        }
+      }());
+
+      // debug(req.body); // body is added to req object by body-parser package
+
 
       // res.json(req.body);
     });
