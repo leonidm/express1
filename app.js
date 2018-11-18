@@ -1,3 +1,4 @@
+/* eslint-disable global-require */
 const express = require('express');
 const chalk = require('chalk');
 const debug = require('debug')('app');
@@ -5,6 +6,9 @@ const morgan = require('morgan');
 const path = require('path');
 const sql = require('mssql');
 const bodyParser = require('body-parser');
+const passport = require('passport');
+const cookieParser = require('cookie-parser');
+const session = require('express-session');
 
 
 debug(`Process id is ${chalk.yellow(process.pid)}`);
@@ -62,6 +66,11 @@ function setUses() {
   app.use(morgan('tiny'));
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: false }));
+  app.use(cookieParser());
+  app.use(session({ secret: 'library' }));
+
+  require('./src/config/passport.js')(app);
+
   app.use(express.static(path.join(__dirname, 'public')));
   app.use('/css', express.static(path.join(__dirname, '/node_modules/bootstrap/dist/css')));
   app.use('/js', express.static(path.join(__dirname, '/node_modules/bootstrap/dist/js')));
@@ -74,7 +83,6 @@ function setViews() {
   app.set('view engine', 'ejs');
 }
 
-/* eslint-disable global-require */
 function setRoutes() {
   const booksRouter = require('./src/routes/booksRoutes')(nav);
   const booksRouterMongo = require('./src/routes/booksRoutesMongo')(nav);
