@@ -59,12 +59,25 @@ module.exports = (nav) => {
       })
     );
 
+  authRouter.route('/logout')
+    .post((req, res) => {
+      req.logout();
+      res.redirect('/');
+    });
+
   authRouter.route('/profile')
+    .all((req, res, next) => {
+      if (req.user) {
+        next();
+      } else {
+        res.redirect('/');
+      }
+    })
     .get((req, res) => {
 
       /* eslint-disable indent */
       res.json(req.user); // 'user' field is added to req object after user logged in (that passport does)
-                          // It happens after call to req.login() in sign-up or passport.authenticate() in sign-in
+      // It happens after call to req.login() in sign-up or passport.authenticate() in sign-in
     });
 
   return authRouter;

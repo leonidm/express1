@@ -11,11 +11,18 @@ module.exports = (nav) => {
   const booksRouter = express.Router();
 
   const closeClient = (client) => {
-    if (client) { 
-      client.close(); 
+    if (client) {
+      client.close();
     }
   };
 
+  booksRouter.use((req, res, next) => {
+    if (req.user) {
+      next();
+    } else {
+      res.redirect('/');
+    }
+  });
 
   booksRouter.route('/')
     .get((req, res) => {
@@ -50,7 +57,7 @@ module.exports = (nav) => {
 
   booksRouter.route('/:id')
     .get((req, res) => {
-      
+
       const { id } = req.params;
       let client;
 
