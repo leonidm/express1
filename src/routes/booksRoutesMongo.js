@@ -1,28 +1,14 @@
 /* eslint-disable prefer-destructuring */
 /* eslint-disable no-underscore-dangle */
 const express = require('express');
-const { MongoClient, ObjectID } = require('mongodb');
+const { ObjectID } = require('mongodb');
 const debug = require('debug')('app:booksRoutesMongo');
+const mongoUtils = require('../mongo');
 // const books = require('./books');
 
 module.exports = (nav) => {
 
   const booksRouter = express.Router();
-
-  const getBooksCollection = async () => {
-
-    const url = 'mongodb://localhost:27017';
-    const dbName = 'libraryApp';
-
-    const client = await MongoClient.connect(url);
-    debug('Connected to mongo server');
-
-    const db = client.db(dbName);
-
-    const col = await db.collection('books');
-
-    return { client, col };
-  };
 
   const closeClient = (client) => {
     if (client) { 
@@ -37,10 +23,9 @@ module.exports = (nav) => {
       (async function query() {
         let client;
         try {
-          const v = await getBooksCollection();
-          client = v.client;
-          const { col } = v;
-          const books = await col.find().toArray();
+          const mongo = await mongoUtils.getCollection('books');
+          client = mongo.client;
+          const books = await mongo.collection.find().toArray();
 
           // ejs needs id of book so copy _id to id
           books.forEach((b) => {
@@ -65,17 +50,16 @@ module.exports = (nav) => {
 
   booksRouter.route('/:id')
     .get((req, res) => {
+      
       const { id } = req.params;
-
       let client;
 
       (async function query() {
         try {
-          const v = await getBooksCollection();
-          client = v.client;
-          const { col } = v;
+          const mongo = await mongoUtils.getCollection('books');
+          client = mongo.client;
 
-          const book = await col.findOne({ _id: new ObjectID(id) });
+          const book = await mongo.collection.findOne({ _id: new ObjectID(id) });
 
           res.render('bookView',
             {

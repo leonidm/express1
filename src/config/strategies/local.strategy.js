@@ -1,7 +1,9 @@
+/* eslint-disable prefer-destructuring */
 const passport = require('passport');
 const { Strategy } = require('passport-local');
-const { MongoClient } = require('mongodb');
 const debug = require('debug')('app:local.strategy');
+const mongoUtils = require('../../mongo');
+
 
 module.exports = () => {
   passport.use(new Strategy(
@@ -11,18 +13,14 @@ module.exports = () => {
     },
     (username, password, done) => {
       
-      const url = 'mongodb://localhost:27017';
-      const dbName = 'libraryApp';
-
       (async function query() {
         let client;
         try {
-          client = await MongoClient.connect(url);
-          debug('Connected to mongo server');
-          const db = client.db(dbName);
-          const col = await db.collection('users');
+          const mongo = await mongoUtils.getCollection('users');
+          client = mongo.client;
 
-          const user = await col.findOne({ username });
+          const user = await mongo.collection.findOne({ username });
+          
           if (user.password === password) {
             done(null, user);
           } else {

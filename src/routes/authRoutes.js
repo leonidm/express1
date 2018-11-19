@@ -1,7 +1,8 @@
+/* eslint-disable prefer-destructuring */
 const express = require('express');
-const { MongoClient } = require('mongodb');
 const debug = require('debug')('app:authRoutes');
 const passport = require('passport');
+const mongoUtils = require('../mongo');
 
 
 module.exports = (nav) => {
@@ -12,18 +13,16 @@ module.exports = (nav) => {
     .post((req, res) => {
 
       const { username, password } = req.body;
-      const url = 'mongodb://localhost:27017';
-      const dbName = 'libraryApp';
 
       (async function query() {
         let client;
         try {
-          client = await MongoClient.connect(url);
-          debug('Connected to mongo server');
-          const db = client.db(dbName);
-          const col = await db.collection('users');
+          const mongo = await mongoUtils.getCollection('users');
+          client = mongo.client;
+
           const user = { username, password };
-          const results = await col.insertOne(user);
+
+          const results = await mongo.collection.insertOne(user);
           // debug(results);
 
           // create user
@@ -62,7 +61,9 @@ module.exports = (nav) => {
 
   authRouter.route('/profile')
     .get((req, res) => {
-      res.json(req.user); // user field is added to req object after user logged in (that passport does)
+
+      /* eslint-disable indent */
+      res.json(req.user); // 'user' field is added to req object after user logged in (that passport does)
                           // It happens after call to req.login() in sign-up or passport.authenticate() in sign-in
     });
 

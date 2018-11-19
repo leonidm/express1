@@ -1,7 +1,9 @@
+/* eslint-disable prefer-destructuring */
 const express = require('express');
-const { MongoClient } = require('mongodb');
 const debug = require('debug')('app:adminRoutes');
 const books = require('./books');
+const mongoUtils = require('../mongo');
+
 
 module.exports = () => {
 
@@ -9,26 +11,21 @@ module.exports = () => {
 
   adminRouter.route('/')
     .get((req, res) => {
-      const url = 'mongodb://localhost:27017';
-      const dbName = 'libraryApp';
 
       (async function query() {
         let client;
         try {
-          client = await MongoClient.connect(url);
-          debug('Connected to mongo server');
+          const mongo = await mongoUtils.getCollection('books');
+          client = mongo.client;
 
-          const db = client.db(dbName);
-
-          const response = await db.collection('books').insertMany(books);
+          const response = await mongo.collection('books').insertMany(books);
 
           res.json(response);
         } catch (err) {
           debug(err.stack);
           res.send('Server error');
         }
-
-        client.close();
+        if (client) client.close();
       }());
     });
 
