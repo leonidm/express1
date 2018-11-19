@@ -87,7 +87,7 @@ function setRoutes() {
   const booksRouter = require('./src/routes/booksRoutes')(nav);
   const booksRouterMongo = require('./src/routes/booksRoutesMongo')(nav);
   const adminRouter = require('./src/routes/adminRoutes')(nav);
-  const authRouter = require('./src/routes/authRoutes')();
+  const authRouter = require('./src/routes/authRoutes')(nav);
 
   app.use('/books', booksRouter);
   app.use('/mongo/books', booksRouterMongo);

@@ -1,13 +1,14 @@
 const express = require('express');
 const { MongoClient } = require('mongodb');
 const debug = require('debug')('app:authRoutes');
+const passport = require('passport');
 
 
-module.exports = () => {
+module.exports = (nav) => {
 
   const authRouter = express.Router();
 
-  authRouter.route('/signUp')
+  authRouter.route('/signUp') // reqistration of new user
     .post((req, res) => {
 
       const { username, password } = req.body;
@@ -45,9 +46,24 @@ module.exports = () => {
       // res.json(req.body);
     });
 
+  authRouter.route('/signin')
+    .get((req, res) => {
+      res.render('signin', {
+        nav,
+        title: 'signIn'
+      });
+    })
+    .post(
+      passport.authenticate('local', {
+        successRedirect: '/auth/profile',
+        failureRedirect: '/'
+      })
+    );
+
   authRouter.route('/profile')
     .get((req, res) => {
       res.json(req.user); // user field is added to req object after user logged in (that passport does)
+                          // It happens after call to req.login() in sign-up or passport.authenticate() in sign-in
     });
 
   return authRouter;
